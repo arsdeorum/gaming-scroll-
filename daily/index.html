@@ -59,7 +59,11 @@ h1,h2,h3,h4{font-family:var(--serif);margin:0;text-wrap:balance;color:var(--ink)
 .nav button.on{color:var(--red)}
 
 .strip{background:var(--salmon);border-bottom:1px solid var(--salmon-2)}
-.strip .wrap{display:flex;overflow-x:auto;scrollbar-width:none}
+.strip .wrap{overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)}
+.strip .track{display:flex;width:max-content;animation:strip 90s linear infinite}
+.strip:hover .track,.strip:focus-within .track{animation-play-state:paused}
+@keyframes strip{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.strip .wrap{overflow-x:auto;scrollbar-width:none;mask-image:none}.strip .track{animation:none}}
 .q{transition:transform 160ms var(--ease-out);flex:none;display:grid;gap:0;padding:9px 18px 9px 0;margin-right:18px;border-right:1px solid var(--salmon-2);font-variant-numeric:tabular-nums;cursor:pointer;background:none;border-top:0;border-bottom:0;border-left:0;text-align:left;color:var(--ink);font-family:var(--sans)}
 .q span{font-size:12px;color:var(--muted)}
 .q b{font-weight:700;font-size:16px;font-family:var(--serif)}
@@ -274,7 +278,8 @@ document.querySelector(".lower").id = "sec-dates";
 function setOn(id){ document.querySelectorAll("#nav button").forEach(x=>x.classList.toggle("on",x.dataset.t===id)); }
 
 /* Key figure strip */
-$("strip").innerHTML = DATA.fig.map(f=>`<button type="button" class="q" data-id="${f[3]}"><span>${esc(f[2])} · ${esc(f[1])}</span><b>${esc(f[0])}</b></button>`).join("");
+{ const fq = (f,dup) => `<button type="button" class="q" data-id="${f[3]}"${dup?' aria-hidden="true" tabindex="-1"':""}><span>${esc(f[2])} · ${esc(f[1])}</span><b>${esc(f[0])}</b></button>`;
+  $("strip").innerHTML = `<div class="track">${DATA.fig.map(f=>fq(f,false)).join("")}${DATA.fig.map(f=>fq(f,true)).join("")}</div>`; }
 
 /* Front page */
 const LEAD = byId("br-ban");
