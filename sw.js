@@ -1,8 +1,8 @@
 /* The Gaming Scroll service worker.
    Pages: network first, so readers always get the latest news; the last copy is used offline.
    Fonts and icons: cache first. The stats page and the API are never cached. */
-const VERSION = "gs-v1";
-const PAGES = ["/", "/daily/"];
+const VERSION = "gs-v2";
+const PAGES = ["/", "/terminal/"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(PAGES.concat(["/manifest.webmanifest", "/icons/icon-192.png"]))).catch(() => {}));
   self.skipWaiting();

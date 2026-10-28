@@ -6,6 +6,23 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
+# Daily is the home page, the terminal is at /terminal/. The files stay where
+# they are (index.html = terminal, daily/index.html = Daily); only the URLs move.
+[[redirects]]
+  from = "/"
+  to = "/daily/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/terminal"
+  to = "/terminal/"
+  status = 301
+[[redirects]]
+  from = "/terminal/"
+  to = "/index.html"
+  status = 200
+  force = true
+
 # The repo root is the publish folder. Hide everything that is not a page.
 [[redirects]]
   from = "/node_modules/*"

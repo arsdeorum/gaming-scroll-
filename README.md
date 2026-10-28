@@ -4,8 +4,8 @@ Static news site for regulated iGaming markets, deployed on Netlify from `main`.
 
 | Path | What it is |
 | --- | --- |
-| `index.html` | Terminal page, served at `/` |
-| `daily/index.html` | Daily page, served at `/daily/` |
+| `index.html` | Terminal page, served at `/terminal/` (rewrite in `netlify.toml`) |
+| `daily/index.html` | Daily page, the home page: served at `/` (and still at `/daily/`) |
 | `stats/index.html` | Private visitor stats at `/stats/` (needs the access key) |
 | `t.js` | Cookie-free visit counter |
 | `netlify/edge-functions/inject-tracker.ts` | Adds `t.js` to the two news pages at the edge, so the page files never need the tracker |
