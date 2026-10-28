@@ -1,4 +1,4 @@
-# Gaming Scroll
+# The Gaming Scroll
 
 Static news site for regulated iGaming markets, deployed on Netlify from `main`.
 

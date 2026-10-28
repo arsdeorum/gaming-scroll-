@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Gaming Scroll</title>
+<title>The Gaming Scroll</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -154,7 +154,7 @@ tbody tr.click{cursor:pointer}
 
 <header class="head"><div class="wrap">
   <div class="bar">
-    <a href="#" class="brand" aria-label="Gaming Scroll"><i></i>Gaming<b>Scroll</b></a>
+    <a href="#" class="brand" aria-label="The Gaming Scroll"><i></i>The Gaming<b>Scroll</b></a>
     <span class="dim hide-s" style="font-size:11px" id="period">REGULATED MARKETS</span>
     <div class="modes" id="modes" role="group" aria-label="Period"><button type="button" data-m="month" aria-pressed="true">This month</button><button type="button" data-m="30d" aria-pressed="false">Last 30 days</button><button type="button" data-m="all" aria-pressed="false">Archive</button></div>
     <div class="clock">
@@ -213,7 +213,7 @@ tbody tr.click{cursor:pointer}
 </main>
 
 <footer class="foot"><div class="wrap">
-  <span>GAMING SCROLL · Independent news on licensed online gambling</span>
+  <span>THE GAMING SCROLL · Independent news on licensed online gambling</span>
   <span>This month runs from the 1st to the last day of the month. Last 30 days ends today. Archive lists every story. Stories are rewritten from official sources where they could be opened.</span>
 </div></footer>
 
@@ -297,15 +297,16 @@ $("ver").innerHTML = Object.keys(vc).map(k=>`<div class="row"><span class="vdot 
 }
 /* Periods: this calendar month (1st to last day), a rolling 30 days ending today, or every story */
 const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const full = d => { const [y,m,dd]=d.split("-"); return `${+dd} ${MON[+m-1]} ${y}`; };
 const FULLMON = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
 function range(mode){
   const now = new Date();
   if(mode==="month"){ const a=new Date(now.getFullYear(),now.getMonth(),1), b=new Date(now.getFullYear(),now.getMonth()+1,0);
     return {from:iso(a), to:iso(b), label:`${FULLMON[now.getMonth()]} ${now.getFullYear()} · 1 TO ${b.getDate()} ${MON[now.getMonth()]}`}; }
   if(mode==="30d"){ const a=new Date(now.getFullYear(),now.getMonth(),now.getDate()-29);
-    return {from:iso(a), to:iso(now), label:`LAST 30 DAYS · ${fmtY(iso(a))} TO ${fmtY(iso(now))}`}; }
+    return {from:iso(a), to:iso(now), label:`LAST 30 DAYS · ${full(iso(a))} TO ${full(iso(now))}`}; }
   const ds = ALL.map(s=>s.date).sort();
-  return {from:"", to:"9999", label:`ARCHIVE · ${ALL.length} STORIES · ${fmtY(ds[0])} TO ${fmtY(ds[ds.length-1])}`};
+  return {from:"", to:"9999", label:`ARCHIVE · ${ALL.length} STORIES · ${full(ds[0])} TO ${full(ds[ds.length-1])}`};
 }
 function setMode(mode, quiet){
   const r = range(mode);
