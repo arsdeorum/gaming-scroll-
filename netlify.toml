@@ -13,12 +13,9 @@
   to = "/daily/index.html"
   status = 200
   force = true
+# Netlify treats /terminal and /terminal/ as the same path, so one rule covers both.
 [[redirects]]
   from = "/terminal"
-  to = "/terminal/"
-  status = 301
-[[redirects]]
-  from = "/terminal/"
   to = "/index.html"
   status = 200
   force = true
