@@ -7,8 +7,10 @@
     try{if(navigator.sendBeacon&&navigator.sendBeacon("/api/hit",new Blob([b],{type:"application/json"})))return}catch(e){}
     try{fetch("/api/hit",{method:"POST",body:b,keepalive:true,headers:{"content-type":"application/json"}})}catch(e){}}
   send({t:"pv"});
-  var sent={},timer=null;
-  function check(){clearTimeout(timer);var id=location.hash.slice(1);if(!/^[a-z0-9-]{2,40}$/.test(id)||sent[id])return;
+  /* count a story only when the visitor chose it: a link with #story, or a click or key press */
+  var sent={},timer=null,acted=!!location.hash;
+  ["pointerdown","keydown","touchstart"].forEach(function(e){addEventListener(e,function(){acted=true},{capture:true,passive:true})});
+  function check(){clearTimeout(timer);var id=location.hash.slice(1);if(!acted||!/^[a-z0-9-]{2,40}$/.test(id)||sent[id])return;
     timer=setTimeout(function(){if(location.hash.slice(1)===id&&!sent[id]){sent[id]=1;send({t:"story",s:id})}},2000)}
   var rs=history.replaceState,ps=history.pushState;
   history.replaceState=function(){var r=rs.apply(this,arguments);check();return r};
