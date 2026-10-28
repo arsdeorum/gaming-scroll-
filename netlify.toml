@@ -1,10 +1,42 @@
 [build]
-  publish = "site"
+  publish = "."
   command = ""
 
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+
+# The repo root is the publish folder. Hide everything that is not a page.
+[[redirects]]
+  from = "/node_modules/*"
+  to = "/404"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/netlify/*"
+  to = "/404"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/package.json"
+  to = "/404"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/package-lock.json"
+  to = "/404"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/netlify.toml"
+  to = "/404"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/README.md"
+  to = "/404"
+  status = 404
+  force = true
 
 # Keep the private stats page out of search engines
 [[headers]]
