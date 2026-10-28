@@ -87,12 +87,11 @@ h1,h2,h3,h4{font-family:var(--serif);margin:0;text-wrap:balance;color:var(--ink)
 .duo{display:grid;grid-template-columns:1fr 1fr;gap:20px;border-top:1px solid var(--rule);padding-top:18px}
 .duo h3{font-size:20px;line-height:1.2}
 
-.ill{position:relative;aspect-ratio:16/9;max-width:100%;background:var(--navy);overflow:hidden;color:var(--onnavy)}
-.ill.s{background:var(--salmon-2);color:var(--ink)}
-.ill::before{content:"";position:absolute;inset:0;background:var(--p)}
-.ill .cap{position:absolute;left:14px;bottom:10px;font-family:var(--serif);font-weight:800;font-size:clamp(36px,6vw,64px);line-height:.9;letter-spacing:-.02em}
-.ill .lab{position:absolute;right:10px;top:10px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--paper);color:var(--ink);padding:2px 7px}
-.ill.sm .cap{font-size:34px}
+.ill{position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;min-height:72px;padding:10px 14px;max-width:100%;overflow:hidden;background:var(--flag,var(--navy));color:var(--fink,#fff)}
+.ill .cap{font-family:var(--serif);font-weight:800;font-size:44px;line-height:.9;letter-spacing:-.02em;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.ill .lab{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--paper);color:var(--ink);padding:2px 7px}
+.ill.sm{min-height:52px}
+.ill.sm .cap{font-size:30px}
 
 .brief{display:grid;gap:4px;padding-bottom:14px;border-bottom:1px solid var(--rule)}
 .brief:last-child{border-bottom:0}
@@ -282,11 +281,17 @@ function setOn(id){ document.querySelectorAll("#nav button").forEach(x=>x.classL
   $("strip").innerHTML = `<div class="track">${DATA.fig.map(f=>fq(f,false)).join("")}${DATA.fig.map(f=>fq(f,true)).join("")}</div>`; }
 
 /* Front page */
+/* Flag colour bars for market codes */
+const FLAGS = {AR:["#74ACDF","#FFFFFF","#74ACDF"],AT:["#C8102E","#FFFFFF","#C8102E"],AU:["#012169","#FFFFFF","#E4002B"],BR:["#009C3B","#FFDF00","#002776"],BW:["#6DA9D2","#FFFFFF","#000000"],CL:["#0039A6","#FFFFFF","#D52B1E"],CO:["#FCD116","#003893","#CE1126"],CW:["#002B7F","#F9E814","#002B7F"],CY:["#FFFFFF","#D57800","#4E5B31"],CZ:["#11457E","#FFFFFF","#D7141A"],DK:["#C8102E","#FFFFFF","#C8102E"],DO:["#002D62","#FFFFFF","#CE1126"],ES:["#AA151B","#F1BF00","#AA151B"],EU:["#003399","#FFCC00","#003399"],FI:["#002F6C","#FFFFFF","#002F6C"],FR:["#002654","#FFFFFF","#CE1126"],GA:["#009E60","#FCD116","#3A75C4"],GB:["#012169","#FFFFFF","#C8102E"],GE:["#FFFFFF","#FF0000","#FFFFFF"],GH:["#CE1126","#FCD116","#006B3F"],GR:["#0D5EAF","#FFFFFF","#0D5EAF"],IE:["#169B62","#FFFFFF","#FF883E"],IN:["#FF9933","#FFFFFF","#138808"],IT:["#009246","#FFFFFF","#CE2B37"],JP:["#FFFFFF","#BC002D","#FFFFFF"],KE:["#000000","#BB0000","#006600"],KH:["#032EA1","#E00025","#032EA1"],KN:["#009E49","#FCD116","#CE1126"],KR:["#FFFFFF","#CD2E3A","#0047A0"],LR:["#BF0A30","#FFFFFF","#002868"],MO:["#00785E","#FFFFFF","#00785E"],MR:["#006233","#FFC400","#D01C1F"],MT:["#FFFFFF","#CF142B"],MX:["#006847","#FFFFFF","#CE1126"],NG:["#008751","#FFFFFF","#008751"],NL:["#AE1C28","#FFFFFF","#21468B"],NO:["#BA0C2F","#FFFFFF","#00205B"],NZ:["#00247D","#FFFFFF","#CC142B"],PE:["#D91023","#FFFFFF","#D91023"],PH:["#0038A8","#CE1126","#FCD116"],PR:["#ED0000","#FFFFFF","#0050F0"],PY:["#D52B1E","#FFFFFF","#0038A8"],RU:["#FFFFFF","#0039A6","#D52B1E"],SE:["#006AA7","#FECC00","#006AA7"],SG:["#EF3340","#FFFFFF"],SX:["#DC171D","#FFFFFF","#012A87"],TN:["#E70013","#FFFFFF","#E70013"],TT:["#CE1126","#000000","#FFFFFF"],UA:["#0057B7","#FFD700"],UG:["#000000","#FCDC04","#D90000"],VN:["#DA251D","#FFFF00","#DA251D"],ZA:["#007A4D","#FFB612","#DE3831","#002395"]};
+const light = h => { const n=parseInt(h.slice(1),16); return ((n>>16)*299+((n>>8)&255)*587+(n&255)*114)/1000 > 160; };
+function flag(mk){ const c = FLAGS[mk]; if(!c) return "";
+  const w = 100/c.length; const g = c.map((x,i)=>`${x} ${(i*w).toFixed(2)}% ${((i+1)*w).toFixed(2)}%`).join(",");
+  return `--flag:linear-gradient(90deg,${g});--fink:${light(c[0])?"#14181F":"#FFFFFF"}`; }
 const LEAD = byId("br-ban");
 $("c1").innerHTML = ["nl-fine","es-limits","nz-auction","it-pay"].map(id=>item(byId(id), id!=="it-pay")).join("");
 $("c2").innerHTML = `
   <article class="item" style="border:0;padding:0;gap:12px">
-    <a href="#br-ban" data-id="br-ban" class="ill" tabindex="-1" aria-hidden="true" style="display:block;--p:repeating-linear-gradient(135deg,transparent 0 22px,rgba(255,255,255,.08) 22px 24px),radial-gradient(circle at 82% 30%,rgba(255,255,255,.18) 0 22%,transparent 22.5%)"><span class="lab">Brazil · MP 1.394/2026</span><span class="cap">BR</span></a>
+    <a href="#br-ban" data-id="br-ban" class="ill" tabindex="-1" aria-hidden="true" style="${flag(LEAD.mk)}"><span class="lab">Brazil · MP 1.394/2026</span><span class="cap">BR</span></a>
     ${kick(LEAD)}
     ${link(LEAD,"h1")}
     <p class="dek">${esc(LEAD.d)} Operators get no refund of licence fees, and fines for platforms are capped at R$50 million per breach.</p>
@@ -297,7 +302,7 @@ $("c2").innerHTML = `
   </article>
   <div class="duo">
     ${[["mt-tax","s","repeating-linear-gradient(90deg,transparent 0 18px,rgba(11,46,89,.10) 18px 19px)"],["in-sc","","conic-gradient(from 200deg at 70% 40%,rgba(255,255,255,.18),transparent 30%,rgba(255,255,255,.10) 55%,transparent 70%)"]].map(([id,c,p])=>{const s=byId(id);
-      return `<article class="item" style="border:0;padding:0"><a href="#${id}" data-id="${id}" class="ill ${c} sm" tabindex="-1" aria-hidden="true" style="display:block;--p:${p}"><span class="cap">${s.mk}</span></a>${kick(s)}${link(s,"h3")}<span class="by">${fmt(s.date)}</span></article>`}).join("")}
+      return `<article class="item" style="border:0;padding:0"><a href="#${id}" data-id="${id}" class="ill sm" tabindex="-1" aria-hidden="true" style="${flag(s.mk)}"><span class="cap">${s.mk}</span></a>${kick(s)}${link(s,"h3")}<span class="by">${fmt(s.date)}</span></article>`}).join("")}
   </div>`;
 $("c3").innerHTML = S.filter(s=>s.brief).map(s=>`<article class="brief"><span class="kicker">${esc(s.mkt)}</span>${link(s,"h4")}<p>${esc(s.d)}</p><span class="by">${fmt(s.date)}${vb(s)}</span></article>`).join("");
 
