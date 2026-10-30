@@ -292,27 +292,28 @@ const light = h => { const n=parseInt(h.slice(1),16); return ((n>>16)*299+((n>>8
 function flag(mk){ const c = FLAGS[mk]; if(!c) return "";
   const w = 100/c.length; const g = c.map((x,i)=>`${x} ${(i*w).toFixed(2)}% ${((i+1)*w).toFixed(2)}%`).join(",");
   return `--flag:linear-gradient(90deg,${g});--fink:${light(c[0])?"#14181F":"#FFFFFF"}`; }
-const LEAD = byId("br-ban");
-$("c1").innerHTML = ["nl-fine","es-limits","nz-auction","it-pay"].filter(id=>byId(id)).map(id=>item(byId(id), id!=="it-pay")).join("");
-$("c2").innerHTML = `
+/* Front page: picks the newest stories automatically on every update. */
+const FP = S.filter(s=>!s.brief&&!s.archive).map((s,i)=>[s,i]).sort((x,y)=>y[0].date.localeCompare(x[0].date)||y[1]-x[1]).map(x=>x[0]);
+const LEAD = FP[0], REL = FP.slice(1,4), SIDE = FP.slice(4,8), DUO = FP.slice(8,10);
+$("c1").innerHTML = SIDE.map((s,i)=>item(s, i<SIDE.length-1)).join("");
+$("c2").innerHTML = LEAD ? `
   <article class="item" style="border:0;padding:0;gap:12px">
-    <a href="#br-ban" data-id="br-ban" class="ill" tabindex="-1" aria-hidden="true" style="${flag(LEAD.mk)}"><span class="lab">Brazil · MP 1.394/2026</span><span class="cap">BR</span></a>
+    <a href="#${LEAD.id}" data-id="${LEAD.id}" class="ill" tabindex="-1" aria-hidden="true" style="${flag(LEAD.mk)}"><span class="lab">${esc(LEAD.mkt)} · ${esc(LEAD.cat)}</span><span class="cap">${esc(LEAD.mk)}</span></a>
     ${kick(LEAD)}
     ${link(LEAD,"h1")}
-    <p class="dek">${esc(LEAD.d)} Operators get no refund of licence fees, and fines for platforms are capped at R$50 million per breach.</p>
-    <span class="by">Latin America Desk · ${fmt(LEAD.date)}</span>
+    <p class="dek">${esc(LEAD.d)}</p>
+    <span class="by">${esc(LEAD.reg)} Desk · ${fmt(LEAD.date)}</span>
     <ul class="related">
-      ${["br-stf","pe-consult","tt-remote"].filter(id=>byId(id)).map(id=>{const s=byId(id); return `<li><a href="#${id}" data-id="${id}" class="lnk">${esc(s.t)}</a></li>`}).join("")}
+      ${REL.map(s=>`<li><a href="#${s.id}" data-id="${s.id}" class="lnk">${esc(s.t)}</a></li>`).join("")}
     </ul>
   </article>
   <div class="duo">
-    ${[["mt-tax","s","repeating-linear-gradient(90deg,transparent 0 18px,rgba(11,46,89,.10) 18px 19px)"],["in-sc","","conic-gradient(from 200deg at 70% 40%,rgba(255,255,255,.18),transparent 30%,rgba(255,255,255,.10) 55%,transparent 70%)"]].map(([id,c,p])=>{const s=byId(id);
-      return `<article class="item" style="border:0;padding:0"><a href="#${id}" data-id="${id}" class="ill sm" tabindex="-1" aria-hidden="true" style="${flag(s.mk)}"><span class="cap">${s.mk}</span></a>${kick(s)}${link(s,"h3")}<span class="by">${fmt(s.date)}</span></article>`}).join("")}
-  </div>`;
-$("c3").innerHTML = S.filter(s=>s.brief).map(s=>`<article class="brief"><span class="kicker">${esc(s.mkt)}</span>${link(s,"h4")}<p>${esc(s.d)}</p><span class="by">${fmt(s.date)}${vb(s)}</span></article>`).join("");
+    ${DUO.map(s=>`<article class="item" style="border:0;padding:0"><a href="#${s.id}" data-id="${s.id}" class="ill sm" tabindex="-1" aria-hidden="true" style="${flag(s.mk)}"><span class="cap">${esc(s.mk)}</span></a>${kick(s)}${link(s,"h3")}<span class="by">${fmt(s.date)}</span></article>`).join("")}
+  </div>` : "";
+$("c3").innerHTML = S.filter(s=>s.brief&&!s.archive).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,10).map(s=>`<article class="brief"><span class="kicker">${esc(s.mkt)}</span>${link(s,"h4")}<p>${esc(s.d)}</p><span class="by">${fmt(s.date)}${vb(s)}</span></article>`).join("");
 
 /* Rules & Tax desk */
-{ const deskIds = ["it-budget","za-tax","tn-tax","lr-nla"].filter(id=>byId(id));
+{ const deskIds = [];
   S.filter(s=>s.cat==="Tax"&&!s.archive&&!deskIds.includes(s.id)).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,Math.max(0,4-deskIds.length)).forEach(s=>deskIds.push(s.id));
   $("desk").innerHTML = deskIds.map(id=>item(byId(id))).join(""); }
 const QA = [
