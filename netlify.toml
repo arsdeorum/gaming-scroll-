@@ -13,6 +13,17 @@
   to = "/daily/index.html"
   status = 200
   force = true
+# Spanish edition: same two pages, the page script reads /es from the URL.
+[[redirects]]
+  from = "/es/terminal"
+  to = "/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/es"
+  to = "/daily/index.html"
+  status = 200
+  force = true
 # Netlify treats /terminal and /terminal/ as the same path, so one rule covers both.
 [[redirects]]
   from = "/terminal"

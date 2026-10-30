@@ -12,7 +12,7 @@ export default async (request: Request, context: Context) => {
 
   if (!html.includes('rel="manifest"')) {
     const path = new URL(request.url).pathname;
-    const daily = !(path.startsWith("/terminal") || path === "/index.html");
+    const daily = !(path.startsWith("/terminal") || path.startsWith("/es/terminal") || path === "/index.html");
     const theme = daily
       ? '<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">' +
         '<meta name="theme-color" content="#0F141B" media="(prefers-color-scheme: dark)">'
@@ -43,6 +43,6 @@ export default async (request: Request, context: Context) => {
 };
 
 export const config: Config = {
-  path: ["/", "/index.html", "/terminal", "/terminal/", "/daily", "/daily/", "/daily/index.html"],
+  path: ["/", "/index.html", "/terminal", "/terminal/", "/daily", "/daily/", "/daily/index.html", "/es", "/es/", "/es/terminal", "/es/terminal/"],
   onError: "bypass",
 };
