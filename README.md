@@ -6,6 +6,7 @@ Static news site for regulated iGaming markets, deployed on Netlify from `main`.
 | --- | --- |
 | `index.html` | Terminal page, served at `/terminal/` (rewrite in `netlify.toml`) |
 | `/es/`, `/es/terminal/` | Spanish edition: the same two files, rewritten in `netlify.toml`; the page script switches language from the URL |
+| `?lang=ru`, `/ru/`, `/ru/terminal/` | Russian edition: the same two files; every story carries a `ru` field, and the page script switches language from `?lang=ru` or the `/ru/` path |
 | `daily/index.html` | Daily page, the home page: served at `/` (and still at `/daily/`) |
 | `stats/index.html` | Private visitor stats at `/stats/` (needs the access key) |
 | `t.js` | Cookie-free visit counter |

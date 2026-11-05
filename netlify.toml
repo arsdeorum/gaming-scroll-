@@ -24,6 +24,18 @@
   to = "/daily/index.html"
   status = 200
   force = true
+# Russian edition: same two pages. The RU button links to ?lang=ru; these rules
+# also make /ru/ and /ru/terminal/ work, and the page script reads /ru from the URL.
+[[redirects]]
+  from = "/ru/terminal"
+  to = "/index.html"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/ru"
+  to = "/daily/index.html"
+  status = 200
+  force = true
 # Netlify treats /terminal and /terminal/ as the same path, so one rule covers both.
 [[redirects]]
   from = "/terminal"
