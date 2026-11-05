@@ -331,6 +331,8 @@ $("fkeys").innerHTML = REG.map((r,i)=>`<button type="button" data-v="${r}"><span
 }
 const tk = DATA.fig.map(f=>`<li><span>${f[2]}</span><b>${f[0]}</b>${esc(f[1])}</li>`).join("");
 $("tick").innerHTML = tk + tk.replace(/<li>/g,'<li aria-hidden="true">');
+/* Ticker runs at a fixed reading speed, however many figures it holds. */
+{ const pxPerSec=40, ul=$("tick"); const set=()=>{ ul.style.animationDuration=Math.max(30,ul.scrollWidth/2/pxPerSec)+"s" }; set(); try{ document.fonts.ready.then(set) }catch(e){} }
 $("figs").innerHTML = DATA.fig.map(f=>`<button type="button" class="fig" data-id="${f[3]}"><b>${f[0]}</b><span>${esc(f[1])}</span><em>${f[2]}</em></button>`).join("");
 $("tape").innerHTML = DATA.enf.map(e=>`<li data-id="${e[3]}"><span class="code">${e[0]}</span><span>${esc(e[1])}</span><span class="amt">${esc(e[2])}</span></li>`).join("");
 const today = new Date().toISOString().slice(0,10);

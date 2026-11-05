@@ -342,6 +342,8 @@ function setOn(id){ document.querySelectorAll("#nav button").forEach(x=>x.classL
 /* Key figure strip */
 { const fq = (f,dup) => `<button type="button" class="q" data-id="${f[3]}"${dup?' aria-hidden="true" tabindex="-1"':""}><span>${esc(f[2])} · ${esc(f[1])}</span><b>${esc(f[0])}</b></button>`;
   $("strip").innerHTML = `<div class="track">${DATA.fig.map(f=>fq(f,false)).join("")}${DATA.fig.map(f=>fq(f,true)).join("")}</div>`; }
+/* Key-figure strip runs at a fixed reading speed, however many figures it holds. */
+{ const pxPerSec=35, tr=document.querySelector("#strip .track"); const set=()=>{ if(tr) tr.style.animationDuration=Math.max(30,tr.scrollWidth/2/pxPerSec)+"s" }; set(); try{ document.fonts.ready.then(set) }catch(e){} }
 
 /* Front page */
 /* Flag colour bars for market codes */
