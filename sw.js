@@ -1,8 +1,8 @@
 /* The Gaming Scroll service worker.
    Pages: network first, so readers always get the latest news; the last copy is used offline.
    Fonts and icons: cache first. The stats page and the API are never cached. */
-const VERSION = "gs-v2";
-const PAGES = ["/", "/terminal/"];
+const VERSION = "gs-v3";
+const PAGES = ["/", "/terminal/", "/es/", "/es/terminal/", "/ru/", "/ru/terminal/"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(PAGES.concat(["/manifest.webmanifest", "/icons/icon-192.png"]))).catch(() => {}));
   self.skipWaiting();
@@ -21,7 +21,7 @@ self.addEventListener("fetch", e => {
     e.respondWith(fetch(req).then(r => {
       if (r.ok) { const copy = r.clone(); caches.open(VERSION).then(c => c.put(url.pathname.endsWith("/") ? url.pathname : req, copy)); }
       return r;
-    }).catch(() => caches.match(url.pathname).then(r => r || caches.match(url.pathname + "/")).then(r => r || caches.match("/"))));
+    }).catch(() => caches.match(url.pathname).then(r => r || caches.match(url.pathname + "/")).then(r => r || caches.match((url.pathname.match(/^\/(es|ru)\//) || [""])[0] || "/")).then(r => r || caches.match("/"))));
     return;
   }
   if (isFont || url.pathname.startsWith("/icons/")) {

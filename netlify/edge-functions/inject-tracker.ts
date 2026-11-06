@@ -4,6 +4,7 @@ import type { Config, Context } from "@netlify/edge-functions";
 // artifacts never needs to carry them itself:
 // 1. the cookie-free visit counter (/t.js), before </body>
 // 2. the app tags (manifest, icons, theme colour, service worker), before </head>
+// 3. the install offer (/install.js), before </body>
 export default async (request: Request, context: Context) => {
   const response = await context.next();
   const type = response.headers.get("content-type") || "";
@@ -12,13 +13,14 @@ export default async (request: Request, context: Context) => {
 
   if (!html.includes('rel="manifest"')) {
     const path = new URL(request.url).pathname;
-    const daily = !(path.startsWith("/terminal") || path.startsWith("/es/terminal") || path === "/index.html");
+    const daily = !(/^\/(es\/|ru\/)?terminal/.test(path) || path === "/index.html");
+    const lang = /^\/es(\/|$)/.test(path) ? "es" : /^\/ru(\/|$)/.test(path) ? "ru" : "";
     const theme = daily
       ? '<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">' +
         '<meta name="theme-color" content="#0F141B" media="(prefers-color-scheme: dark)">'
       : '<meta name="theme-color" content="#07090D">';
     const app =
-      '<link rel="manifest" href="/manifest.webmanifest">' +
+      '<link rel="manifest" href="/manifest' + (lang ? '-' + lang : '') + '.webmanifest">' +
       theme +
       '<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">' +
       '<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">' +
@@ -29,6 +31,12 @@ export default async (request: Request, context: Context) => {
       '<script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})})}</script>';
     const h = html.indexOf("</head>");
     html = h === -1 ? app + html : html.slice(0, h) + app + html.slice(h);
+  }
+
+  if (!html.includes('src="/install.js"')) {
+    const tag = '<script src="/install.js" defer></script>';
+    const i = html.lastIndexOf("</body>");
+    html = i === -1 ? html + tag : html.slice(0, i) + tag + html.slice(i);
   }
 
   if (!html.includes('src="/t.js"')) {
@@ -43,6 +51,6 @@ export default async (request: Request, context: Context) => {
 };
 
 export const config: Config = {
-  path: ["/", "/index.html", "/terminal", "/terminal/", "/daily", "/daily/", "/daily/index.html", "/es", "/es/", "/es/terminal", "/es/terminal/"],
+  path: ["/", "/index.html", "/terminal", "/terminal/", "/daily", "/daily/", "/daily/index.html", "/es", "/es/", "/es/terminal", "/es/terminal/", "/ru", "/ru/", "/ru/terminal", "/ru/terminal/"],
   onError: "bypass",
 };
