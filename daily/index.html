@@ -94,6 +94,13 @@ h1,h2,h3,h4{font-family:var(--serif);margin:0;text-wrap:balance;color:var(--ink)
 .ill.sm{min-height:52px}
 .ill.sm .cap{font-size:30px}
 
+.latest{display:grid;grid-template-columns:1fr 1fr;gap:16px 20px;border-top:1px solid var(--rule);padding-top:16px}
+.latest .item h3{font-size:17px}
+.latest .item:last-child,.latest .item:nth-last-child(2){border-bottom:0;padding-bottom:0}
+.rgrid .item.xtra{display:none}
+.rgrid.open .item.xtra{display:grid}
+.showall{margin:16px 0 4px;font:600 14px var(--sans);color:var(--navy);background:none;border:1px solid var(--navy);border-radius:3px;padding:6px 14px;cursor:pointer;transition:transform 160ms var(--ease-out)}
+.showall:active{transform:scale(0.97)}
 .brief{display:grid;gap:4px;padding-bottom:14px;border-bottom:1px solid var(--rule)}
 .brief:last-child{border-bottom:0}
 .brief h4{font-size:17px;line-height:1.25;font-weight:700}
@@ -386,7 +393,8 @@ function flag(mk){ const c = FLAGS[mk]; if(!c) return "";
 /* Front page: picks the newest stories automatically on every update. */
 const FP = S.filter(s=>!s.brief&&!s.archive).map((s,i)=>[s,i]).sort((x,y)=>y[0].date.localeCompare(x[0].date)||y[1]-x[1]).map(x=>x[0]);
 const LEAD = FP[0], REL = FP.slice(1,4), SIDE = FP.slice(4,8), DUO = FP.slice(8,10);
-$("c1").innerHTML = SIDE.map((s,i)=>item(s, i<SIDE.length-1)).join("");
+const MORE = FP.slice(10,16), POOL = FP.slice(16,28);
+$("c1").innerHTML = SIDE.map(s=>item(s)).join("");
 $("c2").innerHTML = LEAD ? `
   <article class="item" style="border:0;padding:0;gap:12px">
     <a href="#${LEAD.id}" data-id="${LEAD.id}" class="ill" tabindex="-1" aria-hidden="true" style="${flag(LEAD.mk)}"><span class="lab">${esc(LEAD.mkt)} · ${esc(C(LEAD.cat))}</span><span class="cap">${esc(LEAD.mk)}</span></a>
@@ -400,8 +408,29 @@ $("c2").innerHTML = LEAD ? `
   </article>
   <div class="duo">
     ${DUO.map(s=>`<article class="item" style="border:0;padding:0"><a href="#${s.id}" data-id="${s.id}" class="ill sm" tabindex="-1" aria-hidden="true" style="${flag(s.mk)}"><span class="cap">${esc(s.mk)}</span></a>${kick(s)}${link(s,"h3")}<span class="by">${fmt(s.date)}</span></article>`).join("")}
-  </div>` : "";
-$("c3").innerHTML = S.filter(s=>s.brief&&!s.archive).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,10).map(s=>`<article class="brief"><span class="kicker">${esc(s.mkt)}</span>${link(s,"h4")}<p>${esc(s.d)}</p><span class="by">${fmt(s.date)}${vb(s)}</span></article>`).join("");
+  </div>
+  ${MORE.length?`<div class="latest">${MORE.map(s=>item(s,false)).join("")}</div>`:""}` : "";
+const BRIEFS = S.filter(s=>s.brief&&!s.archive).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,12);
+$("c3").innerHTML = BRIEFS.map(s=>`<article class="brief"><span class="kicker">${esc(s.mkt)}</span>${link(s,"h4")}<p>${esc(s.d)}</p><span class="by">${fmt(s.date)}${vb(s)}</span></article>`).join("");
+
+/* Balance the three front-page columns: the left column takes more stories and the
+   briefs column is cut so all three end at about the same height. Desktop only. */
+function balanceFront(){
+  const c3col = document.querySelector(".front .c3");
+  const bottom = (col,list) => { const k=list.lastElementChild; return k ? k.getBoundingClientRect().bottom - col.getBoundingClientRect().top : 0; };
+  const h1 = () => bottom($("c1"),$("c1")), h2 = () => bottom($("c2"),$("c2")), h3 = () => bottom(c3col,$("c3"));
+  const briefHTML = s => `<article class="brief"><span class="kicker">${esc(s.mkt)}</span>${link(s,"h4")}<p>${esc(s.d)}</p><span class="by">${fmt(s.date)}${vb(s)}</span></article>`;
+  const left = SIDE.slice(); $("c1").innerHTML = left.map(s=>item(s)).join("");
+  $("c3").innerHTML = BRIEFS.map(briefHTML).join("");
+  if(innerWidth <= 1000){ while($("c3").children.length > 6) $("c3").lastElementChild.remove(); return; }
+  let i = 0;
+  while(i < POOL.length && h1() < h2() - 120){ left.push(POOL[i++]); $("c1").innerHTML = left.map(s=>item(s)).join(""); }
+  const target = Math.max(h1(), h2());
+  while($("c3").children.length > 3 && h3() > target + 30) $("c3").lastElementChild.remove();
+}
+balanceFront();
+try{ document.fonts.ready.then(balanceFront) }catch(e){}
+{ let t; addEventListener("resize",()=>{ clearTimeout(t); t=setTimeout(balanceFront,200) }); }
 
 /* Rules & Tax desk */
 { const deskIds = [];
@@ -443,18 +472,30 @@ $("qaTabs").innerHTML = QA.map((x,i)=>`<button type="button" data-i="${i}">${x.t
 $("qaTabs").addEventListener("click",e=>{const b=e.target.closest("button"); if(!b)return; qi=+b.dataset.i; showQA()});
 showQA();
 
+/* Region grids show the first rows; a button opens the rest. */
+const moreLabel = n => RU ? `Показать все (${n})` : ES ? `Ver todas (${n})` : `Show all ${n}`;
+const lessLabel = () => RU ? "Свернуть" : ES ? "Ver menos" : "Show fewer";
+function grid(arr,n){
+  const cards = arr.map((s,i)=> i<n ? item(s) : item(s).replace('<article class="item">','<article class="item xtra">')).join("");
+  return `<div class="rgrid">${cards}</div>${arr.length>n?`<button type="button" class="showall" data-n="${arr.length}" aria-expanded="false">${moreLabel(arr.length)}</button>`:""}`;
+}
+document.addEventListener("click",e=>{ const b=e.target.closest(".showall"); if(!b) return;
+  const g=b.previousElementSibling, open=!g.classList.contains("open");
+  g.classList.toggle("open",open); b.setAttribute("aria-expanded",open); b.textContent = open ? lessLabel() : moreLabel(b.dataset.n);
+  if(!open){ const top=g.getBoundingClientRect().top; if(top<0) g.scrollIntoView({block:"start"}); } });
+
 /* Region sections */
 $("regions").innerHTML = REG.map(r=>{ const arr=S.filter(s=>s.reg===r);
   return `<section class="region" id="sec-${r.toLowerCase().replace(/\s+/g,"-")}"><div class="wrap">
     <div class="sec-h"><h2>${R(r)}</h2><span class="r">${arr.length} ${RU?plRU(arr.length,"новость","новости","новостей"):ES?(arr.length===1?"noticia":"noticias"):(arr.length===1?"story":"stories")} · ${new Set(arr.map(s=>s.mkt)).size} ${RU?plRU(new Set(arr.map(s=>s.mkt)).size,"рынок","рынка","рынков"):ES?"mercados":"markets"}</span></div>
-    <div class="rgrid">${arr.map(s=>item(s)).join("")}</div></div></section>`}).join("");
+    ${grid(arr,9)}</div></section>`}).join("");
 
 /* 2026 archive */
 $("archive").innerHTML = `<section class="region" id="sec-archive"><div class="wrap">
   <div class="sec-h"><h2>${RU?"Архив 2026":ES?"Archivo 2026":"2026 archive"}</h2><span class="r">${ARC.length} ${RU?plRU(ARC.length,"новость","новости","новостей")+" · с 1 января по 27 сентября 2026 года":ES?"noticias · del 1 de enero al 27 de septiembre de 2026":"stories · 1 January to 27 September 2026"}</span></div>
   <p class="arc-intro">${RU?"Более ранние новости 2026 года, написанные по официальным источникам.":ES?"Noticias anteriores de 2026, redactadas a partir de fuentes oficiales.":"Earlier 2026 stories, rewritten from official sources where they could be opened. Stories marked Press only or Partly confirmed say what could not be checked."}</p>
   ${REG.map(r=>{ const arr=ARC.filter(s=>s.reg===r); if(!arr.length) return "";
-    return `<h3 class="arc-h">${R(r)} · ${arr.length}</h3><div class="rgrid">${arr.map(s=>item(s)).join("")}</div>`}).join("")}
+    return `<h3 class="arc-h">${R(r)} · ${arr.length}</h3>${grid(arr,6)}`}).join("")}
 </div></section>`;
 
 /* Key dates + legend */
