@@ -28,3 +28,9 @@ chat) moves them into `/data/<chunk>-<hash>.js`, shared by both pages and all la
 a day chunk for stories published this week, week chunks for the last 35 days, month chunks for older ones.
 The hash in the name changes only when the file content changes, so readers download only new or
 changed files (served as immutable). `data/chunks.json` records each story's publish day and is not served.
+
+## Rumors (since 7 Nov 2026)
+`DATA.rumors` in both pages holds reports not confirmed by an official source, rated 1 to 5 Scrollpoints
+(fields id, reg, mk, mkt, cat, date, t, d, b, src, sp, why, es, ru). It is separate from `DATA.stories`:
+the official-only filter does not apply to it, and it stays inline in the page (it is not split into /data).
+The Daily shows it as the Rumors section; the terminal as the RUMORS mode.
