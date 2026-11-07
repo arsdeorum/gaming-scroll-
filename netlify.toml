@@ -13,27 +13,27 @@
   to = "/daily/index.html"
   status = 200
   force = true
-# Spanish edition: same two pages, the page script reads /es from the URL.
+# Spanish edition: build.mjs writes Spanish-only copies of the two pages.
 [[redirects]]
   from = "/es/terminal"
-  to = "/index.html"
+  to = "/index.es.html"
   status = 200
   force = true
 [[redirects]]
   from = "/es"
-  to = "/daily/index.html"
+  to = "/daily/index.es.html"
   status = 200
   force = true
 # Russian edition: same two pages. The RU button links to ?lang=ru; these rules
 # also make /ru/ and /ru/terminal/ work, and the page script reads /ru from the URL.
 [[redirects]]
   from = "/ru/terminal"
-  to = "/index.html"
+  to = "/index.ru.html"
   status = 200
   force = true
 [[redirects]]
   from = "/ru"
-  to = "/daily/index.html"
+  to = "/daily/index.ru.html"
   status = 200
   force = true
 # Netlify treats /terminal and /terminal/ as the same path, so one rule covers both.

@@ -6,6 +6,21 @@ import type { Config, Context } from "@netlify/edge-functions";
 // 2. the app tags (manifest, icons, theme colour, service worker), before </head>
 // 3. the install offer (/install.js), before </body>
 export default async (request: Request, context: Context) => {
+  // ?lang=es or ?lang=ru on an English address: send the reader to that
+  // language's page, which carries only that language's text (see build.mjs).
+  const url = new URL(request.url);
+  const want = url.searchParams.get("lang");
+  if (want === "es" || want === "ru" || want === "en") {
+    const term = /terminal/.test(url.pathname) || url.pathname === "/index.html";
+    const target = (want === "en" ? "" : "/" + want) + (term ? "/terminal/" : "/");
+    const m = url.pathname.match(/^\/(es|ru)(\/|$)/);
+    const cur = m ? m[1] : "en";
+    if (cur !== want) {
+      url.searchParams.delete("lang");
+      const q = url.searchParams.toString();
+      return Response.redirect(new URL(target + (q ? "?" + q : ""), url).toString(), 302);
+    }
+  }
   const response = await context.next();
   const type = response.headers.get("content-type") || "";
   if (!type.includes("text/html")) return response;
