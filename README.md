@@ -21,3 +21,10 @@ Updating the pages: replace `index.html` and `daily/index.html` as before. Nothi
 Privacy: no cookies, no IP addresses or user agents stored. A visitor is a hash of a daily random salt, IP and user agent, so each person counts once per day and cannot be followed across days. Do Not Track and Global Privacy Control turn counting off. Known bots are ignored.
 
 The stats access key is the `STATS_TOKEN` environment variable in Netlify (Functions scope). Change it there and redeploy to rotate it.
+
+## Story data files (since 7 Nov 2026)
+The two pages no longer carry the stories inline. The sync step (sync_site.py + split_data.py in Diego's
+chat) moves them into `/data/<chunk>-<hash>.js`, shared by both pages and all languages:
+a day chunk for stories published this week, week chunks for the last 35 days, month chunks for older ones.
+The hash in the name changes only when the file content changes, so readers download only new or
+changed files (served as immutable). `data/chunks.json` records each story's publish day and is not served.
