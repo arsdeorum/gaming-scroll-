@@ -99,6 +99,16 @@
     Content-Type = "application/manifest+json"
     Cache-Control = "public, max-age=3600"
 [[headers]]
+  for = "/manifest-*.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json"
+    Cache-Control = "public, max-age=3600"
+# Small scripts without a hash in the name: cache for an hour, then check for a newer copy.
+[[headers]]
+  for = "/install.js"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+[[headers]]
   for = "/icons/*"
   [headers.values]
     Cache-Control = "public, max-age=604800"
