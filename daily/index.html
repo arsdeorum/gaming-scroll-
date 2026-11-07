@@ -391,7 +391,7 @@ function flag(mk){ const c = FLAGS[mk]; if(!c) return "";
   const w = 100/c.length; const g = c.map((x,i)=>`${x} ${(i*w).toFixed(2)}% ${((i+1)*w).toFixed(2)}%`).join(",");
   return `--flag:linear-gradient(90deg,${g});--fink:${light(c[0])?"#14181F":"#FFFFFF"}`; }
 /* Front page: picks the newest stories automatically on every update. */
-const FP = S.filter(s=>!s.brief&&!s.archive).map((s,i)=>[s,i]).sort((x,y)=>y[0].date.localeCompare(x[0].date)||y[1]-x[1]).map(x=>x[0]);
+const FP = S.filter(s=>!s.brief&&!s.archive).map((s,i)=>[s,i]).sort((x,y)=>y[0].date.localeCompare(x[0].date)||x[1]-y[1]).map(x=>x[0]);
 const LEAD = FP[0], REL = FP.slice(1,4), SIDE = FP.slice(4,8), DUO = FP.slice(8,10);
 const MORE = FP.slice(10,16), POOL = FP.slice(16,28);
 $("c1").innerHTML = SIDE.map(s=>item(s)).join("");
