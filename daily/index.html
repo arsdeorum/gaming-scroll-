@@ -170,6 +170,27 @@ footer p{font-size:13px;color:var(--muted);margin:6px 0 0}
 .langs{display:inline-flex;border:1px solid var(--navy);border-radius:3px;overflow:hidden}
 .langs button{font:600 13px var(--sans);padding:5px 10px;border:0;background:none;color:var(--navy);cursor:pointer}
 .langs button[aria-pressed="true"]{background:var(--navy);color:var(--onnavy)}
+.find .wrap{padding-block:12px}
+.find .bar{position:relative;display:flex;align-items:center;gap:10px;border:1px solid var(--rule);border-radius:3px;background:var(--paper);padding:0 12px}
+.find .bar:focus-within{border-color:var(--navy);box-shadow:0 0 0 1px var(--navy)}
+.find label{font:700 17px var(--sans);color:var(--red);cursor:text}
+.find input{flex:1;min-width:0;border:0;background:none;color:var(--ink);font:16px var(--sans);padding:11px 0;outline:none}
+.find input::placeholder{color:var(--muted)}
+.find .hint{font-size:12px;color:var(--muted);white-space:nowrap}
+.find .hint kbd{font:inherit;border:1px solid var(--rule);border-radius:2px;padding:0 4px}
+.find .res{position:absolute;left:-1px;right:-1px;top:calc(100% + 4px);z-index:8;list-style:none;margin:0;padding:4px 0;background:var(--paper);border:1px solid var(--rule);border-radius:3px;box-shadow:0 12px 32px rgba(20,24,31,.16);max-height:min(60vh,520px);overflow:auto;overscroll-behavior:contain;opacity:1;transform:none;transition:opacity 150ms ease-out,transform 150ms var(--ease-out)}
+.find .res[hidden]{display:none}
+.find .res.enter{opacity:0;transform:translateY(-4px)}
+.find .res li{display:grid;grid-template-columns:84px 34px minmax(0,1fr);gap:10px;align-items:baseline;padding:9px 14px;cursor:pointer}
+.find .res li[aria-selected="true"]{background:var(--salmon)}
+.find .res .dt{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.find .res .mk{font-size:13px;font-weight:700;color:var(--navy)}
+.find .res .h{display:block;font:700 16px/1.25 var(--serif);color:var(--ink)}
+.find .res .c{display:block;margin-top:2px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.find .res .note{display:block;padding:10px 14px;font-size:13px;color:var(--muted);cursor:default}
+@media (hover:hover) and (pointer:fine){.find .res li:not(.note):hover{background:var(--salmon)}}
+@media (max-width:680px){.find .hint{display:none}.find .res li{grid-template-columns:34px minmax(0,1fr)}.find .res .dt{display:none}}
+@media (prefers-reduced-motion:reduce){.find .res{transition:none}}
 /* Reading overlay */
 .ov{opacity:0;transition:opacity 150ms ease-out;position:fixed;inset:0;z-index:20;background:var(--veil);display:flex;justify-content:center;align-items:flex-start;overflow-y:auto;padding:max(24px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
 .ov.in{opacity:1;transition-duration:220ms}
@@ -224,6 +245,13 @@ footer p{font-size:13px;color:var(--muted);margin:6px 0 0}
 </div></header>
 
 <nav class="nav" aria-label="Sections"><ul id="nav"></ul></nav>
+
+<div class="find"><div class="wrap"><div class="bar" role="search">
+  <label for="find" aria-hidden="true">&gt;</label>
+  <input id="find" type="text" autocomplete="off" spellcheck="false" enterkeyhint="search" role="combobox" aria-expanded="false" aria-controls="findRes" aria-autocomplete="list" aria-label="Search stories" placeholder="Type a market (IT, BR, NZ), a regulator (KSA) or a keyword (tax, fine), then Enter">
+  <span class="hint"><kbd>/</kbd> search · <kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> open · <kbd>Esc</kbd> clear</span>
+  <ul class="res" id="findRes" role="listbox" hidden></ul>
+</div></div></div>
 
 <div class="strip" aria-label="Key figures"><div class="wrap" id="strip"></div></div>
 
@@ -606,6 +634,70 @@ try{ const io=new IntersectionObserver(es=>{ es.forEach(en=>{ if(en.isIntersecti
   NAV.forEach(([,id])=>{ const el=$(id); if(el) io.observe(el); }); }catch(e){}
 function fromHash(){ const id=location.hash.slice(1); if(id&&byId(id)) open(id,false); }
 addEventListener("hashchange",fromHash);
+
+/* Search line: a market code (IT), a regulator (KSA) or words (tax fine). Every word must match.
+   A two-letter market code matches that market only, so IT does not also find "with". */
+{
+  const inp=$("find"), res=$("findRes");
+  const T = RU ? {ph:"Введите рынок (IT, BR, NZ), регулятора (KSA) или слово (налог, штраф) и нажмите Enter", lab:"Поиск по новостям",
+                  hint:"<kbd>/</kbd> поиск · <kbd>↑</kbd><kbd>↓</kbd> выбор · <kbd>Enter</kbd> открыть · <kbd>Esc</kbd> очистить",
+                  none:"Ничего не найдено. Попробуйте IT, KSA, налог или штраф.", more:n=>`Ещё ${n}. Уточните запрос.`, rum:"Не подтверждено"}
+          : ES ? {ph:"Escribe un mercado (IT, BR, NZ), un regulador (KSA) o una palabra (impuesto, multa) y pulsa Enter", lab:"Buscar noticias",
+                  hint:"<kbd>/</kbd> buscar · <kbd>↑</kbd><kbd>↓</kbd> mover · <kbd>Enter</kbd> abrir · <kbd>Esc</kbd> borrar",
+                  none:"Sin resultados. Prueba IT, KSA, impuesto o multa.", more:n=>`${n} más. Afina la búsqueda.`, rum:"Sin confirmar"}
+          : {none:"No match. Try IT, KSA, tax or fine.", more:n=>`${n} more. Narrow the search.`, rum:"Unconfirmed"};
+  if(T.ph){ inp.placeholder=T.ph; inp.setAttribute("aria-label",T.lab); document.querySelector(".find .hint").innerHTML=T.hint; }
+  const norm = v => String(v||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toUpperCase();
+  const POOL = ALL.concat(RUM);
+  const MKS = new Set(POOL.map(s=>s.mk));
+  const HAY = new Map(POOL.map(s=>[s, norm([s.mk,s.mkt,s.auth,s.cat,C(s.cat),s.t,s.d,(s.b||[]).join(" ")].join(" "))]));
+  const MAX = 20;
+  let hits=[], sel=0;
+  function find(){
+    const toks = norm(inp.value).trim().split(/\s+/).filter(Boolean);
+    if(!toks.length){ close(); return; }
+    hits = POOL.filter(s=>{ const h=HAY.get(s); return toks.every(t=> t.length===2 && MKS.has(t) ? s.mk===t : h.includes(t)); })
+               .sort((a,b)=>b.date.localeCompare(a.date));
+    sel = 0; paint();
+  }
+  function paint(){
+    const L = hits.slice(0,MAX);
+    res.innerHTML = L.length
+      ? L.map((s,i)=>`<li role="option" id="fr${i}" data-id="${s.id}" aria-selected="${i===sel}"><span class="dt">${fmt(s.date)}</span><span class="mk">${s.mk}</span><span><span class="h">${esc(s.t)}</span><span class="c">${esc(C(s.cat))} · ${esc(s.rum?T.rum:s.auth)}</span></span></li>`).join("")
+        + (hits.length>MAX ? `<li class="note" aria-hidden="true">${T.more(hits.length-MAX)}</li>` : "")
+      : `<li class="note">${T.none}</li>`;
+    if(res.hidden){ res.hidden=false; res.classList.add("enter"); requestAnimationFrame(()=>res.classList.remove("enter")); }
+    inp.setAttribute("aria-expanded","true");
+    if(L.length) inp.setAttribute("aria-activedescendant","fr"+sel); else inp.removeAttribute("aria-activedescendant");
+  }
+  function move(d){
+    const n=Math.min(hits.length,MAX); if(!n) return;
+    sel=(sel+d+n)%n;
+    res.querySelectorAll('li[role="option"]').forEach((li,i)=>li.setAttribute("aria-selected",i===sel));
+    inp.setAttribute("aria-activedescendant","fr"+sel);
+    const li=$("fr"+sel); if(li) li.scrollIntoView({block:"nearest"});
+  }
+  function close(){ res.hidden=true; res.innerHTML=""; inp.setAttribute("aria-expanded","false"); inp.removeAttribute("aria-activedescendant"); hits=[]; }
+  function go(id){ close(); inp.blur(); open(id); }
+  inp.addEventListener("input",find);
+  inp.addEventListener("focus",()=>{ if(inp.value.trim()) find(); });
+  inp.addEventListener("keydown",e=>{
+    if(e.key==="ArrowDown"){ e.preventDefault(); if(res.hidden) find(); else move(1); }
+    else if(e.key==="ArrowUp"){ e.preventDefault(); move(-1); }
+    else if(e.key==="Enter"){ e.preventDefault(); if(res.hidden) find(); const s=hits[sel]; if(s) go(s.id); }
+    else if(e.key==="Escape"){ e.preventDefault(); if(inp.value){ inp.value=""; close(); } else inp.blur(); }
+  });
+  res.addEventListener("mousedown",e=>{ if(e.target.closest("li")) e.preventDefault(); });
+  res.addEventListener("click",e=>{ const li=e.target.closest("li[data-id]"); if(li) go(li.dataset.id); });
+  inp.addEventListener("blur",()=>setTimeout(()=>{ if(document.activeElement!==inp) close(); },120));
+  document.addEventListener("keydown",e=>{
+    if(e.key!=="/" || e.metaKey || e.ctrlKey || e.altKey) return;
+    const a=document.activeElement; if(a && (/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) || a.isContentEditable)) return;
+    if(!$("ov").hidden) return;
+    e.preventDefault(); inp.focus(); inp.select();
+  });
+}
+
 
 /* Date + theme */
 { const d=new Date().toLocaleDateString(RU?"ru-RU":ES?"es-ES":"en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"}); $("date").textContent = d.charAt(0).toUpperCase()+d.slice(1); }
