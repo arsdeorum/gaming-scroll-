@@ -10,7 +10,8 @@ Static news site for regulated iGaming markets, deployed on Netlify from `main`.
 | `daily/index.html` | Daily page, the home page: served at `/` (and still at `/daily/`) |
 | `stats/index.html` | Private visitor stats at `/stats/` (needs the access key) |
 | `t.js` | Cookie-free visit counter |
-| `netlify/edge-functions/inject-tracker.ts` | Adds `t.js` to the two news pages at the edge, so the page files never need the tracker |
+| `netlify/edge-functions/inject-tracker.ts` | Adds `t.js`, the app tags and the link preview tags (description, Open Graph, Twitter card, canonical, hreflang) to the news pages at the edge, so the page files never need them |
+| `icons/og-image-en.png`, `-es`, `-ru` | 1200 x 630 link preview images, one per language |
 | `netlify/functions/hit.mts` | `POST /api/hit`, records one page view or story read |
 | `manifest.webmanifest`, `icons/` | App manifest and icons, so the site can be installed on phones and desktops |
 | `sw.js` | Service worker: pages load from the network first and work offline from the last copy |

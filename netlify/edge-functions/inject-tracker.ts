@@ -5,6 +5,7 @@ import type { Config, Context } from "@netlify/edge-functions";
 // 1. the cookie-free visit counter (/t.js), before </body>
 // 2. the app tags (manifest, icons, theme colour, service worker), before </head>
 // 3. the install offer (/install.js), before </body>
+// 4. link preview and search tags (Open Graph, canonical, hreflang), after <head>
 export default async (request: Request, context: Context) => {
   // ?lang=es or ?lang=ru on an English address: send the reader to that
   // language's page, which carries only that language's text (see build.mjs).
@@ -46,6 +47,54 @@ export default async (request: Request, context: Context) => {
       '<script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})})}</script>';
     const h = html.indexOf("</head>");
     html = h === -1 ? app + html : html.slice(0, h) + app + html.slice(h);
+  }
+
+  // 4. link preview and search tags (description, Open Graph, Twitter card,
+  //    canonical, language alternates), per page and language, before </head>.
+  if (!html.includes('property="og:title"')) {
+    const path = new URL(request.url).pathname;
+    const term = /^\/(es\/|ru\/)?terminal/.test(path) || path === "/index.html";
+    const lang = /^\/es(\/|$)/.test(path) ? "es" : /^\/ru(\/|$)/.test(path) ? "ru" : "en";
+    const SITE = "https://gamingscroll.net";
+    const at = (l: string) => SITE + (l === "en" ? "" : "/" + l) + (term ? "/terminal/" : "/");
+    const DESC: Record<string, string> = {
+      en: "Regulatory news on regulated gambling markets worldwide, written from official sources: regulators, gazettes, parliaments and courts. Updated every day.",
+      es: "Noticias regulatorias de los mercados de juego regulados de todo el mundo, a partir de fuentes oficiales: reguladores, boletines oficiales, parlamentos y tribunales. Actualización diaria.",
+      ru: "Регуляторные новости рынков азартных игр по всему миру на основе официальных источников: регуляторов, официальных изданий, парламентов и судов. Обновляется ежедневно.",
+    };
+    const LOCALE: Record<string, string> = { en: "en_GB", es: "es_ES", ru: "ru_RU" };
+    const ALT: Record<string, string> = {
+      en: "The Gaming Scroll: regulatory news on regulated gambling markets",
+      es: "The Gaming Scroll: noticias regulatorias del juego regulado",
+      ru: "The Gaming Scroll: регуляторные новости рынков азартных игр",
+    };
+    const title = term ? "The Gaming Scroll Terminal" : "The Gaming Scroll Daily";
+    const img = SITE + "/icons/og-image-" + lang + ".png";
+    const q = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+    const meta =
+      '<meta name="description" content="' + q(DESC[lang]) + '">' +
+      '<link rel="canonical" href="' + at(lang) + '">' +
+      ["en", "es", "ru"].map((l) => '<link rel="alternate" hreflang="' + l + '" href="' + at(l) + '">').join("") +
+      '<link rel="alternate" hreflang="x-default" href="' + at("en") + '">' +
+      '<meta property="og:type" content="website">' +
+      '<meta property="og:site_name" content="The Gaming Scroll">' +
+      '<meta property="og:title" content="' + title + '">' +
+      '<meta property="og:description" content="' + q(DESC[lang]) + '">' +
+      '<meta property="og:url" content="' + at(lang) + '">' +
+      '<meta property="og:locale" content="' + LOCALE[lang] + '">' +
+      ["en", "es", "ru"].filter((l) => l !== lang).map((l) => '<meta property="og:locale:alternate" content="' + LOCALE[l] + '">').join("") +
+      '<meta property="og:image" content="' + img + '">' +
+      '<meta property="og:image:width" content="1200">' +
+      '<meta property="og:image:height" content="630">' +
+      '<meta property="og:image:alt" content="' + q(ALT[lang]) + '">' +
+      '<meta name="twitter:card" content="summary_large_image">' +
+      '<meta name="twitter:title" content="' + title + '">' +
+      '<meta name="twitter:description" content="' + q(DESC[lang]) + '">' +
+      '<meta name="twitter:image" content="' + img + '">';
+    // Put the tags at the top of <head>, so crawlers that read only the first
+    // tags see them before any other og:image.
+    const h = html.indexOf("<head>");
+    html = h === -1 ? meta + html : html.slice(0, h + 6) + meta + html.slice(h + 6);
   }
 
   if (!html.includes('src="/install.js"')) {
