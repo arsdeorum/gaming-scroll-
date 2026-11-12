@@ -147,6 +147,14 @@ tbody tr.click{cursor:pointer}
 .foot .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;padding-block:12px}
 
 .langs button[aria-pressed="true"]{border-color:var(--amber);color:var(--amber)}
+.share{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding-top:4px}
+.share .sh-h{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-right:4px}
+.share a,.share button{display:inline-flex;align-items:center;min-height:30px;padding:4px 9px;font:12px var(--mono);text-transform:uppercase;letter-spacing:.04em;color:var(--fg);background:var(--bg);border:1px solid var(--line);cursor:pointer;text-decoration:none;transition:transform 160ms var(--ease-out),border-color 150ms ease}
+.share a:active,.share button:active{transform:scale(0.97)}
+.share .ok{color:var(--up);border-color:var(--up)}
+@media (hover:hover) and (pointer:fine){
+  .share a:hover,.share button:hover{border-color:var(--amber);color:var(--amber)}
+}
 @media (hover:hover) and (pointer:fine){
   .blot li:hover,.fig:hover,.tape li:hover,.cal li:hover,tbody tr.click:hover{background:var(--hi)}
   .src a:hover{color:#fff}
@@ -363,6 +371,35 @@ function openStory(id){
   if(innerWidth<1100) $("reader").scrollIntoView({behavior:motion(),block:"start"});
 }
 
+/* Share an open story: the device's own share sheet where there is one, then LinkedIn, X,
+   WhatsApp, Telegram, email and copy link. Links point at the story on gamingscroll.net. */
+const SHARE_L = RU ? {h:"Поделиться",native:"Поделиться…",copy:"Копировать ссылку",copied:"Ссылка скопирована",mail:"Эл. почта"}
+              : ES ? {h:"Compartir",native:"Compartir…",copy:"Copiar enlace",copied:"Enlace copiado",mail:"Correo"}
+              : {h:"Share",native:"Share…",copy:"Copy link",copied:"Link copied",mail:"Email"};
+const storyURL = s => "https://gamingscroll.net" + (ES?"/es":RU?"/ru":"") + (PAGE==="terminal"?"/terminal/":"/") + "#" + s.id;
+function shareBar(s){
+  const u=encodeURIComponent(storyURL(s)), t=encodeURIComponent(s.t), d=encodeURIComponent(s.d);
+  const a=(href,label)=>`<a href="${href}" target="_blank" rel="noopener">${label}</a>`;
+  return `<div class="share" data-sid="${s.id}" role="group" aria-label="${SHARE_L.h}"><span class="sh-h">${SHARE_L.h}</span>`
+    + (navigator.share ? `<button type="button" data-share="native">${SHARE_L.native}</button>` : "")
+    + a(`https://www.linkedin.com/sharing/share-offsite/?url=${u}`,"LinkedIn")
+    + a(`https://x.com/intent/post?text=${t}&url=${u}`,"X")
+    + a(`https://wa.me/?text=${t}%20${u}`,"WhatsApp")
+    + a(`https://t.me/share/url?url=${u}&text=${t}`,"Telegram")
+    + `<a href="mailto:?subject=${t}&body=${d}%0A%0A${u}">${SHARE_L.mail}</a>`
+    + `<button type="button" data-share="copy" aria-live="polite">${SHARE_L.copy}</button></div>`;
+}
+document.addEventListener("click", async e=>{
+  const b=e.target.closest("[data-share]"); if(!b) return;
+  const s=byId(b.closest(".share").dataset.sid); if(!s) return;
+  e.preventDefault(); e.stopPropagation();
+  const url=storyURL(s);
+  if(b.dataset.share==="native"){ try{ await navigator.share({title:s.t,text:s.d,url}) }catch(err){} return; }
+  try{ await navigator.clipboard.writeText(url) }
+  catch(err){ const i=document.createElement("input"); i.value=url; document.body.appendChild(i); i.select(); try{ document.execCommand("copy") }catch(_){} i.remove(); }
+  b.textContent=SHARE_L.copied; b.classList.add("ok");
+  setTimeout(()=>{ b.textContent=SHARE_L.copy; b.classList.remove("ok") },1600);
+}, true);
 function render(){
   const L = list(); if(st.sel>=L.length||st.sel<0) st.sel=0;
   $("count").textContent = L.length + (st.mode==="rum" ? (RU?" "+plRU(L.length,"СООБЩЕНИЕ","СООБЩЕНИЯ","СООБЩЕНИЙ"):ES?" RUMORES":" RUMORS") : RU?" "+plRU(L.length,"НОВОСТЬ","НОВОСТИ","НОВОСТЕЙ"):ES?" NOTICIAS":" ITEMS");
@@ -376,6 +413,7 @@ function render(){
     <h1 class="rh">${esc(s.t)}</h1>
     <p class="rd">${esc(s.d)}</p>${s.rum?rbox(s):""}
     <div class="rb">${s.b.map((p,i)=>`<p>${esc(p)}</p>${(i===0&&s.table)?`<table class="ntbl"><thead><tr><th>${RU?"Организация":ES?"Entidad":"Entity"}</th><th class="n">${RU?"Права":ES?"Derechos":"Rights"}</th></tr></thead><tbody>${s.table.map(r=>`<tr><td>${esc(r[0])}</td><td class="n">${r[1]}</td></tr>`).join("")}</tbody></table><p></p>`:""}`).join("")}</div>
+    ${shareBar(s)}
     <div class="src"><h3>${RU?"Источники":ES?"Fuentes":"Sources"}</h3><ul>${s.src.map(x=>`<li><i class="${x[2]}">${x[2]==="o"?(RU?"ОФИЦ.":ES?"OFICIAL":"OFFICIAL"):(RU?"ПРЕССА":ES?"PRENSA":"PRESS")}</i>${x[1]?`<a href="${esc(x[1])}" target="_blank" rel="noopener">${esc(x[0])}</a>`:`<span>${esc(x[0])}</span>`}</li>`).join("")}</ul></div>
     <p class="keys">${RU?"<kbd>J</kbd> далее <kbd>K</kbd> назад <kbd>/</kbd> командная строка":ES?"<kbd>J</kbd> siguiente <kbd>K</kbd> anterior <kbd>/</kbd> línea de comandos":"<kbd>J</kbd> next <kbd>K</kbd> previous <kbd>/</kbd> command line"}</p>`
     : `<p class="dim">${RU?"Ничего не выбрано.":ES?"Nada seleccionado.":"Nothing selected."}</p>`;

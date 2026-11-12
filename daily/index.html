@@ -189,6 +189,12 @@ footer p{font-size:13px;color:var(--muted);margin:6px 0 0}
 @media (hover:hover) and (pointer:fine){.find .res li:not(.note):hover{background:var(--salmon)}}
 @media (max-width:680px){.find .hint{display:none}.find .res li{grid-template-columns:34px minmax(0,1fr)}.find .res .dt{display:none}}
 @media (prefers-reduced-motion:reduce){.find .res{transition:none}}
+.share{display:flex;flex-wrap:wrap;align-items:center;gap:8px;border-top:1px solid var(--rule);padding-top:12px}
+.share .sh-h{font:700 12px var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-right:4px}
+.share a,.share button{display:inline-flex;align-items:center;min-height:34px;padding:6px 11px;font:600 13px var(--sans);color:var(--navy);background:none;border:1px solid var(--rule);border-radius:3px;cursor:pointer;text-decoration:none;transition:transform 160ms var(--ease-out),border-color 150ms ease}
+.share a:active,.share button:active{transform:scale(0.97)}
+.share .ok{color:var(--up);border-color:var(--up)}
+@media (hover:hover) and (pointer:fine){.share a:hover,.share button:hover{border-color:var(--navy)}}
 /* Reading overlay */
 .ov{opacity:0;transition:opacity 150ms ease-out;position:fixed;inset:0;z-index:20;background:var(--veil);display:flex;justify-content:center;align-items:flex-start;overflow-y:auto;padding:max(24px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
 .ov.in{opacity:1;transition-duration:220ms}
@@ -600,6 +606,35 @@ $("vO").textContent=vc.official;
 
 /* Reading overlay */
 const ov=$("ov"), art=$("art"); let lastFocus=null;
+/* Share an open story: the device's own share sheet where there is one, then LinkedIn, X,
+   WhatsApp, Telegram, email and copy link. Links point at the story on gamingscroll.net. */
+const SHARE_L = RU ? {h:"Поделиться",native:"Поделиться…",copy:"Копировать ссылку",copied:"Ссылка скопирована",mail:"Эл. почта"}
+              : ES ? {h:"Compartir",native:"Compartir…",copy:"Copiar enlace",copied:"Enlace copiado",mail:"Correo"}
+              : {h:"Share",native:"Share…",copy:"Copy link",copied:"Link copied",mail:"Email"};
+const storyURL = s => "https://gamingscroll.net" + (ES?"/es":RU?"/ru":"") + (PAGE==="terminal"?"/terminal/":"/") + "#" + s.id;
+function shareBar(s){
+  const u=encodeURIComponent(storyURL(s)), t=encodeURIComponent(s.t), d=encodeURIComponent(s.d);
+  const a=(href,label)=>`<a href="${href}" target="_blank" rel="noopener">${label}</a>`;
+  return `<div class="share" data-sid="${s.id}" role="group" aria-label="${SHARE_L.h}"><span class="sh-h">${SHARE_L.h}</span>`
+    + (navigator.share ? `<button type="button" data-share="native">${SHARE_L.native}</button>` : "")
+    + a(`https://www.linkedin.com/sharing/share-offsite/?url=${u}`,"LinkedIn")
+    + a(`https://x.com/intent/post?text=${t}&url=${u}`,"X")
+    + a(`https://wa.me/?text=${t}%20${u}`,"WhatsApp")
+    + a(`https://t.me/share/url?url=${u}&text=${t}`,"Telegram")
+    + `<a href="mailto:?subject=${t}&body=${d}%0A%0A${u}">${SHARE_L.mail}</a>`
+    + `<button type="button" data-share="copy" aria-live="polite">${SHARE_L.copy}</button></div>`;
+}
+document.addEventListener("click", async e=>{
+  const b=e.target.closest("[data-share]"); if(!b) return;
+  const s=byId(b.closest(".share").dataset.sid); if(!s) return;
+  e.preventDefault(); e.stopPropagation();
+  const url=storyURL(s);
+  if(b.dataset.share==="native"){ try{ await navigator.share({title:s.t,text:s.d,url}) }catch(err){} return; }
+  try{ await navigator.clipboard.writeText(url) }
+  catch(err){ const i=document.createElement("input"); i.value=url; document.body.appendChild(i); i.select(); try{ document.execCommand("copy") }catch(_){} i.remove(); }
+  b.textContent=SHARE_L.copied; b.classList.add("ok");
+  setTimeout(()=>{ b.textContent=SHARE_L.copy; b.classList.remove("ok") },1600);
+}, true);
 function open(id, push=true){
   const s=byId(id); if(!s) return;
   const LS = s.rum ? RUM : s.archive ? ARC : S, i=LS.indexOf(s), prev=LS[i-1], next=LS[i+1];
@@ -610,6 +645,7 @@ function open(id, push=true){
     <p class="dek">${esc(s.d)}</p>
     <span class="by">${desk(s.reg)}${s.archive?(RU?" · Архив 2026":ES?" · Archivo 2026":" · 2026 archive"):""} · ${fmt(s.date)}${s.rum?`<span class="rtag">${RTAG}</span>`:` · ${esc(s.auth)}${vb(s)}`}</span>${s.rum?rbox(s):""}
     <div class="body">${s.b.map((p,k)=>`<p>${esc(p)}</p>${(k===0&&s.table)?`<table class="ntbl"><thead><tr><th>${RU?"Организация":ES?"Entidad":"Entity"}</th><th class="n">${RU?"Права":ES?"Derechos":"Rights"}</th></tr></thead><tbody>${s.table.map(r=>`<tr><td>${esc(r[0])}</td><td class="n">${r[1]}</td></tr>`).join("")}</tbody></table>`:""}`).join("")}</div>
+    ${shareBar(s)}
     <div class="srcs"><h4>${RU?"Источники":ES?"Fuentes":"Sources"}</h4><ul>${s.src.map(x=>`<li><i class="${x[2]}">${x[2]==="o"?(RU?"ОФИЦИАЛЬНО":ES?"OFICIAL":"OFFICIAL"):(RU?"ПРЕССА":ES?"PRENSA":"PRESS")}</i>${x[1]?`<a href="${esc(x[1])}" target="_blank" rel="noopener">${esc(x[0])}</a>`:`<span>${esc(x[0])}</span>`}</li>`).join("")}</ul></div>
     <div class="nav2">${prev?`<button type="button" data-id="${prev.id}">${RU?"Назад":ES?"Anterior":"Previous"}: ${esc(prev.t)}</button>`:"<span></span>"}${next?`<button type="button" data-id="${next.id}">${RU?"Далее":ES?"Siguiente":"Next"}: ${esc(next.t)}</button>`:""}</div>`;
   if(ov.hidden || !ov.classList.contains("in")){ clearTimeout(hideT); lastFocus=lastFocus||document.activeElement; ov.hidden=false; document.body.classList.add("lock"); ov.offsetWidth; ov.classList.add("in"); }
