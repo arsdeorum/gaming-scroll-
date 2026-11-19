@@ -8,7 +8,7 @@ Steps, from the repo root, after saving both artifact pages with Artifact read (
     export GS_TERM=<saved terminal index.html> GS_DAILY=<saved Daily index.html>
     python3 pipeline/relay_check.py          # exit 1: a story would be lost or lacks es/ru, stop
     python3 pipeline/sync_site.py "News update <date> <time>"   # builds, commits, pushes; prints "no change" if nothing new
-    NODE_PATH=$(npm root -g) node pipeline/render_check.js      # renders the six pages; every line must say errors 0
+    NODE_PATH=$(npm root -g) node pipeline/render_check.cjs      # renders the six pages; every line must say errors 0
 
 What sync_site.py does:
 - keeps only stories marked "official" in DATA.stories, plus the approved verification-pass stories in `approved/` (with Spanish and Russian text);
