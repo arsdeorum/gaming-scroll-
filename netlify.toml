@@ -69,6 +69,12 @@
   to = "/404"
   status = 404
   force = true
+# Publishing scripts used by the scheduled news task; not part of the site.
+[[redirects]]
+  from = "/pipeline/*"
+  to = "/404"
+  status = 404
+  force = true
 [[redirects]]
   from = "/data/chunks.json"
   to = "/404"
