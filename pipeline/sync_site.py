@@ -3,7 +3,7 @@
 Usage: python3 sync_site.py  (after saving both artifacts' index.html with Artifact read + path)
 Only index.html and daily/index.html are touched.
 """
-import os, re, subprocess, shutil, sys
+import json, os, re, subprocess, shutil, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -84,18 +84,28 @@ def build():
         assert r.returncode == 0, name + " script error: " + r.stderr[:300]
         open(f"{REPO}/{name}", "w", encoding="utf-8").write(s)
         assert load_data(f"{REPO}/{name}", REPO) == full[name], name + " split does not rebuild the same DATA"
+    return full["daily/index.html"]
+
+def write_status(daily, stamp):
+    """status.json: a small public summary of what is online, so a run can check the live site after the deploy."""
+    from verify_published import status_of
+    st = {"stamp": stamp}
+    st.update(status_of(daily))
+    json.dump(st, open(f"{REPO}/status.json", "w"), indent=0)
 
 def main():
   for attempt in range(2):
       run("git", "fetch", "-q", "origin", "main")
       run("git", "reset", "-q", "--hard", "FETCH_HEAD")
-      build()
-      if not run("git", "status", "--porcelain", "index.html", "daily/index.html", "data").stdout.strip():
+      daily = build()
+      msg = sys.argv[1] if len(sys.argv) > 1 else "Sync pages from artifacts"
+      has_status = os.path.exists(f"{REPO}/status.json")
+      if has_status and not run("git", "status", "--porcelain", "index.html", "daily/index.html", "data").stdout.strip():
           print("no change"); sys.exit(0)
+      write_status(daily, msg)
       if os.environ.get("DRY"):
           print("dry run: built, not committed"); sys.exit(0)
-      run("git", "add", "-A", "index.html", "daily/index.html", "data")
-      msg = sys.argv[1] if len(sys.argv) > 1 else "Sync pages from artifacts"
+      run("git", "add", "-A", "index.html", "daily/index.html", "data", "status.json")
       run("git", "-c", "user.name=Claude", "-c", "user.email=noreply@anthropic.com", "commit", "-qm",
           msg + "\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\n"
           "Claude-Session: https://claude.ai/code/session_013V3RWd3gr2mtoQavTTQvti")

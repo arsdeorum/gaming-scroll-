@@ -10,6 +10,13 @@ Steps, from the repo root, after saving both artifact pages with Artifact read (
     python3 pipeline/sync_site.py "News update <date> <time>"   # builds, commits, pushes; prints "no change" if nothing new
     NODE_PATH=$(npm root -g) node pipeline/render_check.cjs      # renders the six pages; every line must say errors 0
 
+    python3 pipeline/verify_published.py <new story and rumor ids>   # exit 1: something is not in the published repo
+    then open https://gamingscroll.net/status.json and compare it with the "LIVE MUST SHOW" line
+
+Fail check: an inbox file is marked "published" only when verify_published.py passes and the live
+status.json shows the same stamp, counts and ids value. If not, the inbox stays "pending" and the next run tries again.
+sync_site.py writes status.json (stamp = commit message, story and rumor counts, a hash of all ids, newest story date).
+
 What sync_site.py does:
 - keeps only stories marked "official" in DATA.stories, plus the approved verification-pass stories in `approved/` (with Spanish and Russian text);
 - keeps DATA.rumors as it is;
