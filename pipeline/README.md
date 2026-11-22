@@ -13,7 +13,7 @@ Steps, from the repo root:
     NODE_PATH=$(npm root -g) node pipeline/render_check.cjs           # renders the six pages; every line must say errors 0
     python3 pipeline/verify_published.py <new story and rumor ids>     # exit 1: something is not in the pushed repo
     then fetch https://gamingscroll.net/status.json and compare it with the "LIVE MUST SHOW" line
-    python3 pipeline/export_index.py                   # small files for the research and LinkedIn tasks
+    python3 pipeline/export_index.py                   # writes .gs_index/ (git-ignored); upload each file with project_write local_path
 
 items.json format: see the docstring of add_items.py.
 

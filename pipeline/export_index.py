@@ -1,7 +1,7 @@
 """Write the small files the other scheduled tasks read instead of the full site pages.
 
 Usage (repo root, after a verified publish):
-    python3 pipeline/export_index.py            # writes /tmp/gs_index/*
+    python3 pipeline/export_index.py            # writes .gs_index/* in the repo folder (git-ignored)
 Files, to upload to the claude.ai Project with project_write (local_path):
     index-europe.json, index-latin-america.json, index-caribbean.json,
     index-africa.json, index-asia.json, index-oceania.json
@@ -20,7 +20,7 @@ from split_data import load_data
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.environ.get("GS_REPO") or os.path.dirname(HERE)
-OUT = os.environ.get("GS_INDEX_OUT", "/tmp/gs_index")
+OUT = os.environ.get("GS_INDEX_OUT", os.path.join(REPO, ".gs_index"))  # project_write uploads only from the working folder
 REGIONS = {"Europe": "europe", "Latin America": "latin-america", "Caribbean": "caribbean",
            "Africa": "africa", "Asia": "asia", "Oceania": "oceania"}
 
