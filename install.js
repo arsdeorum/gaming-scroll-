@@ -12,7 +12,7 @@
     if (Date.now() - later < 30 * DAY) return;
 
     var path = location.pathname;
-    var lang = /^\/es(\/|$)/.test(path) ? "es" : /^\/ru(\/|$)/.test(path) ? "ru" : "en";
+    var lang = /^\/es(\/|$)/.test(path) ? "es" : /^\/ru(\/|$)/.test(path) ? "ru" : /^\/it(\/|$)/.test(path) ? "it" : "en";
     var terminal = /terminal/.test(path) || path === "/index.html";
     var T = {
       en: { title: "Install The Gaming Scroll", body: "Open it from your home screen, full screen, and read saved pages offline.", go: "Install", no: "Not now", ok: "Got it",
@@ -20,7 +20,9 @@
       es: { title: "Instala The Gaming Scroll", body: "Ábrela desde la pantalla de inicio, a pantalla completa, y lee sin conexión las páginas guardadas.", go: "Instalar", no: "Ahora no", ok: "Entendido",
             ios: "Toca el botón Compartir y luego “Añadir a pantalla de inicio”." },
       ru: { title: "Установите The Gaming Scroll", body: "Открывайте с домашнего экрана во весь экран и читайте сохраненные страницы без сети.", go: "Установить", no: "Не сейчас", ok: "Понятно",
-            ios: "Нажмите «Поделиться», затем «На экран „Домой“»." }
+            ios: "Нажмите «Поделиться», затем «На экран „Домой“»." },
+      it: { title: "Installa The Gaming Scroll", body: "Aprila dalla schermata Home, a tutto schermo, e leggi offline le pagine salvate.", go: "Installa", no: "Non ora", ok: "Ho capito",
+            ios: "Tocca il pulsante Condividi, poi “Aggiungi alla schermata Home”." }
     }[lang];
 
     var ua = navigator.userAgent;

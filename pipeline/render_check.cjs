@@ -1,7 +1,7 @@
 // Render the six site pages from a folder (repo layout) and print headline, errors, text hash.
 const {chromium}=require('playwright');const fs=require('fs');const path=require('path');const crypto=require('crypto');
 const root=process.argv[2]||path.join(__dirname,'..');
-const pages={'/':'daily/index.html','/es/':'daily/index.html','/ru/':'daily/index.html','/terminal/':'index.html','/es/terminal/':'index.html','/ru/terminal/':'index.html'};
+const pages={'/':'daily/index.html','/es/':'daily/index.html','/ru/':'daily/index.html','/terminal/':'index.html','/es/terminal/':'index.html','/ru/terminal/':'index.html','/it/':'daily/index.html','/it/terminal/':'index.html'};
 (async()=>{const b=await chromium.launch();
 for (const [p,f] of Object.entries(pages)){const pg=await b.newPage({viewport:{width:400,height:900}});const errs=[];pg.on('pageerror',e=>errs.push(e.message));
 await pg.route('**/*',r=>{const u=new URL(r.request().url()); if(u.hostname==='site.test'){

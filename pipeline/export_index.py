@@ -9,7 +9,7 @@ Files, to upload to the claude.ai Project with project_write (local_path):
         [id, market code, date, headline] and all open rumors [id, market code, date, headline, sp].
         The research tasks read only their region's file.
     recent.json
-        official stories of the last 8 days (English text, es and ru headline and summary) and the cal rows from today on,
+        official stories of the last 8 days (English text, es, ru and it headline and summary; it only from 25 Nov 2026) and the cal rows from today on,
         for the LinkedIn task.
 Project paths: claude/index/<file>.
 """
@@ -28,7 +28,7 @@ REGIONS = {"Europe": "europe", "Latin America": "latin-america", "Caribbean": "c
 def slim(s):
     """English story text plus the Spanish and Russian headline and summary: what the LinkedIn posts need."""
     o = {k: s[k] for k in ("id", "mk", "mkt", "auth", "cat", "date", "t", "d", "b", "src") if k in s}
-    for lang in ("es", "ru"):
+    for lang in ("es", "ru", "it"):
         if isinstance(s.get(lang), dict):
             o[lang] = {k: s[lang][k] for k in ("t", "d") if k in s[lang]}
     return o

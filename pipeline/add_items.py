@@ -9,18 +9,18 @@ Then run relay_check.py, sync_site.py, render_check.cjs and verify_published.py 
 
 items.json (every key optional):
 {
-  "stories":  [story objects in site format, each with complete "es" and "ru"],
+  "stories":  [story objects in site format, each with complete "es", "ru" and "it"],
   "story_fixes": [{"id": "...", "set": {"t": "...", "b": [...], "es": {...}, "ru": {...}}}],
   "rumors":   [full rumor objects; an existing id is replaced, a new id is added],
   "rumors_remove": ["r-..."],
-  "cal": [[date, mk, text, story id, es text, ru text]],
-  "fig": [[value, label, mk, story id, es label, ru label, ru value]],
-  "enf": [[mk, text, tag, story id, es text, es tag, ru text, ru tag]],
-  "qa":  [{"en": {"t","id","h","l"}, "es": {...}, "ru": {...}}]   newest first,
+  "cal": [[date, mk, text, story id, es text, ru text, it text]],
+  "fig": [[value, label, mk, story id, es label, ru label, ru value, it label]],
+  "enf": [[mk, text, tag, story id, es text, es tag, ru text, ru tag, it text, it tag]],
+  "qa":  [{"en": {"t","id","h","l"}, "es": {...}, "ru": {...}, "it": {...}}]   newest first,
   "today": {"id": "story id", "text": "one English sentence"}
 }
 The script refuses (exit 1) anything that would break a site rule it can check:
-missing es/ru, paragraph counts that differ, em or en dashes, an id that already exists,
+missing es/ru/it, paragraph counts that differ, em or en dashes, an id that already exists,
 a row, QA entry or Today line that points to a missing story, a story without an official source.
 """
 import json, os, re, sys
@@ -45,8 +45,8 @@ def dashes(obj, where):
         err(where + " has an em or en dash")
 
 
-def check_lang(o, where, keys):
-    for lang in ("es", "ru"):
+def check_lang(o, where, keys, langs=("es", "ru", "it")):
+    for lang in langs:
         e = o.get(lang)
         if not isinstance(e, dict):
             err("%s has no %s text" % (where, lang)); continue
@@ -80,8 +80,9 @@ def qa_line(e):
 
 def add_qa(h, entries, ids):
     """Prepend entries to the three QA arrays of the Daily page and keep the newest QA_MAX."""
-    blocks = [("ru", "const QA_RU = [\n", "\n];\nconst QA = RU ? QA_RU : ES ? [\n"),
-              ("es", "\n];\nconst QA = RU ? QA_RU : ES ? [\n", "\n] : [\n"),
+    blocks = [("ru", "const QA_RU = [\n", "\n];\nconst QA_IT = [\n"),
+              ("it", "\n];\nconst QA_IT = [\n", "\n];\nconst QA = RU ? QA_RU : IT ? QA_IT : ES ? [\n"),
+              ("es", "\n];\nconst QA = RU ? QA_RU : IT ? QA_IT : ES ? [\n", "\n] : [\n"),
               ("en", "\n] : [\n", "\n];")]
     removed = None
     for lang, start, end in blocks:
@@ -129,7 +130,9 @@ def main():
                 err("fix for missing story " + f["id"]); continue
             dashes(f["set"], "fix " + f["id"])
             byid[f["id"]].update(f["set"])
-            check_lang(byid[f["id"]], "fixed story " + f["id"], ("t", "d", "b"))
+            # Stories older than 25 Nov 2026 have no Italian text: a fix needs it only if the story has it.
+            check_lang(byid[f["id"]], "fixed story " + f["id"], ("t", "d", "b"),
+                       ("es", "ru", "it") if "it" in byid[f["id"]] else ("es", "ru"))
         for r in items.get("rumors", []):
             w = "rumor " + r.get("id", "?")
             if not r.get("id", "").startswith("r-"):
@@ -149,6 +152,9 @@ def main():
             d["rumors"] = [r for r in d["rumors"] if r["id"] not in gone]
         for k in ("cal", "fig", "enf"):
             for row in items.get(k, []):
+                need = {"cal": 7, "fig": 8, "enf": 10}[k]
+                if len(row) < need:
+                    err("%s row needs %d columns with the Italian text at the end: %s" % (k, need, row[:4]))
                 if len(row) < 4 or row[3] not in have:
                     err("%s row points to a missing story: %s" % (k, row[:4]))
                 dashes(row, k + " row")

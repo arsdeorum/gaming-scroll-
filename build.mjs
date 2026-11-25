@@ -21,9 +21,9 @@ const TERSER = {
 };
 const JS_FILES = ["install.js", "t.js", "sw.js"];
 const PAGES = [["index.html", "index"], ["daily/index.html", "daily/index"]];
-const LANGS = ["en", "es", "ru"];
+const LANGS = ["en", "es", "ru", "it"];
 const HTML_FILES = ["index.html", "daily/index.html", "stats/index.html",
-  ...PAGES.flatMap(([, b]) => [`${b}.es.html`, `${b}.ru.html`])];
+  ...PAGES.flatMap(([, b]) => [`${b}.es.html`, `${b}.ru.html`, `${b}.it.html`])];
 const kb = (n) => (n / 1024).toFixed(1) + "kB";
 
 
@@ -41,19 +41,19 @@ function bake(o, lang, keys) {
     for (const k of keys) if (e[k]) o[k] = e[k];
     if (e.b && e.b.length) o.b = e.b;
   }
-  delete o.es; delete o.ru;
+  delete o.es; delete o.ru; delete o.it;
   return o;
 }
 const STORY_KEYS = ["t", "d", "mkt", "auth"], RUMOR_KEYS = ["t", "d", "mkt", "why"];
 const js = (v) => JSON.stringify(v).replace(/<\//g, "<\\/");
 
 async function splitLanguages() {
-  // Safety net first: the Spanish and Russian routes must never 404, so each
+  // Safety net first: the Spanish, Russian and Italian routes must never 404, so each
   // gets a full copy of the page before the slimmer version is attempted.
   for (const [src, base] of PAGES) {
     if (!existsSync(src)) continue;
     const html = await readFile(src, "utf8");
-    for (const l of ["es", "ru"]) await writeFile(`${base}.${l}.html`, html);
+    for (const l of ["es", "ru", "it"]) await writeFile(`${base}.${l}.html`, html);
   }
   const done = new Set();
   for (const [src, base] of PAGES) {

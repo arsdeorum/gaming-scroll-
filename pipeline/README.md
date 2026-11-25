@@ -10,7 +10,7 @@ Steps, from the repo root:
     export GS_TERM=/tmp/gs_pages/term.html GS_DAILY=/tmp/gs_pages/daily.html
     python3 pipeline/relay_check.py                    # exit 1: a story would be lost or lacks es/ru, stop
     python3 pipeline/sync_site.py "News update <date> <time> Madrid"   # builds, commits, pushes; "no change" if nothing new
-    NODE_PATH=$(npm root -g) node pipeline/render_check.cjs           # renders the six pages; every line must say errors 0
+    NODE_PATH=$(npm root -g) node pipeline/render_check.cjs           # renders the eight pages (EN, ES, RU, IT); every line must say errors 0
     python3 pipeline/verify_published.py <new story and rumor ids>     # exit 1: something is not in the pushed repo
     then fetch https://gamingscroll.net/status.json and compare it with the "LIVE MUST SHOW" line
     python3 pipeline/export_index.py                   # writes .gs_index/ (git-ignored); upload each file with project_write local_path
