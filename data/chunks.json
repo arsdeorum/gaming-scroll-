@@ -212,6 +212,7 @@
 "br-caixa-pix-prizes": "2026-11-12",
 "br-caixa-quina-friday-7173": "2026-11-22",
 "br-chamber-pact-saude-nao-se-aposta": "2026-11-11",
+"br-cmo-plan24-2027-revenue-report-betting-6-7bn": "2026-11-26",
 "br-committee": "2026-09-28",
 "br-df-tjdft-self-exclusion-refund": "2026-11-18",
 "br-go-pcgo-maquina-fraudes": "2026-11-12",
@@ -275,6 +276,7 @@
 "ch-casinos": "2026-10-02",
 "ch-esbk": "2026-10-20",
 "ch-esbk-article": "2026-10-27",
+"ch-esbk-gespa-blocklist-nov24": "2026-11-26",
 "ch-esbk-inspect": "2026-10-29",
 "ch-gespa-illegal": "2026-10-30",
 "ch-gespa-protection-2025": "2026-11-02",
@@ -574,6 +576,7 @@
 "it-budget-gaming-arts-23-32-text": "2026-11-25",
 "it-budget-hearings-upb-boi-istat-gaming": "2026-11-13",
 "it-budget-service-vq543-preu": "2026-11-13",
+"it-camera-dossier-gaming-acts-pending-nov23": "2026-11-26",
 "it-cdc-budget-gaming": "2026-11-11",
 "it-cjeu-ag-c19425-ad-ban": "2026-11-22",
 "it-cnel-budget-gaming-880m": "2026-11-13",
@@ -591,8 +594,10 @@
 "jm-casino": "2026-07-29",
 "jp-aichi-ir-evaluation-committee": "2026-11-13",
 "jp-hokkaido-ir-no-skip": "2026-11-09",
+"jp-jta-ir-size-rules-no-change": "2026-11-26",
 "jp-osaka": "2026-10-09",
 "jp-osaka-addiction-centre-trial": "2026-11-18",
+"jp-tokyo-no-ir-application-2027": "2026-11-26",
 "ke-court": "2026-10-21",
 "ke-senate-agok": "2026-11-03",
 "ke-senate-regs-extension": "2026-11-04",
@@ -931,5 +936,6 @@
 "za-siu-nlc-lawyer-suspended": "2026-11-22",
 "za-south-africa": "2026-10-27",
 "za-tax": "2026-10-21",
-"za-wc-casino-relocation-tax-hearing": "2026-11-18"
+"za-wc-casino-relocation-tax-hearing": "2026-11-18",
+"za-wc-wcgrb-board-interviews": "2026-11-26"
 }
